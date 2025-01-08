@@ -1,0 +1,21 @@
+meta {
+  name: Create Company Type
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/api/company_types
+  body: json
+  auth: none
+}
+
+headers {
+  ~Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJpdmFuYmlzaW1icmUiLCJpYXQiOjE3MzM5MTIwNjIsImV4cCI6MTczNDUxNjg2Mn0.4bLoUbkCcQn5VsrYJeXXaG7PT652rkFHDettKdFRJJI
+}
+
+body:json {
+  {
+    "type": "Test"
+  }
+}
