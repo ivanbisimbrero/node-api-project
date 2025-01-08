@@ -67,12 +67,19 @@ describe('AuthController Integration Test', () => {
         .send({ username: '', email: '', password: '' });
 
       expect(res.status).toBe(400);
-      expect(res.body.message).toBe('UserInputValidationError');
+      expect(res.body.error).toBe('UserInputValidationError');
     });
   });
 
   describe('POST /auth/login', () => {
     it('should authenticate user and return a token', async () => {
+      const resUser = await request(app)
+        .post('/auth/register')
+        .send({
+          username: 'testuser',
+          email: 'test@example.com',
+          password: 'password123'
+        });
       const res = await request(app)
         .post('/auth/login')
         .send({
@@ -90,7 +97,7 @@ describe('AuthController Integration Test', () => {
         .send({ username: '', password: 'password123' });
 
       expect(res.status).toBe(400);
-      expect(res.body.message).toBe('InvalidUsernameError');
+      expect(res.body.error).toBe('InvalidUsernameError');
     });
 
     it('should return 404 if user not found', async () => {
@@ -99,16 +106,23 @@ describe('AuthController Integration Test', () => {
         .send({ username: 'unknownuser', password: 'password123' });
 
       expect(res.status).toBe(404);
-      expect(res.body.message).toBe('UserNotFoundError');
+      expect(res.body.error).toBe('UserNotFoundError');
     });
 
     it('should return 401 if password is invalid', async () => {
+      const resUser = await request(app)
+        .post('/auth/register')
+        .send({
+          username: 'testuser',
+          email: 'test@example.com',
+          password: 'password123'
+        });
       const res = await request(app)
         .post('/auth/login')
         .send({ username: 'testuser', password: 'wrongpassword' });
 
       expect(res.status).toBe(401);
-      expect(res.body.message).toBe('InvalidPasswordError');
+      expect(res.body.error).toBe('InvalidPasswordError');
     });
   });
 });
