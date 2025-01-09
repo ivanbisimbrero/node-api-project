@@ -100,16 +100,16 @@ describe('AuthController Integration Test', () => {
       expect(res.body.error).toBe('InvalidUsernameError');
     });
 
-    it('should return 404 if user not found', async () => {
+    it('should return 403 if user not found', async () => {
       const res = await request(app)
         .post('/auth/login')
         .send({ username: 'unknownuser', password: 'password123' });
 
-      expect(res.status).toBe(404);
-      expect(res.body.error).toBe('UserNotFoundError');
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('InvalidUsernameOrPasswordError');
     });
 
-    it('should return 401 if password is invalid', async () => {
+    it('should return 403 if password is invalid', async () => {
       const resUser = await request(app)
         .post('/auth/register')
         .send({
@@ -121,8 +121,8 @@ describe('AuthController Integration Test', () => {
         .post('/auth/login')
         .send({ username: 'testuser', password: 'wrongpassword' });
 
-      expect(res.status).toBe(401);
-      expect(res.body.error).toBe('InvalidPasswordError');
+      expect(res.status).toBe(403);
+      expect(res.body.error).toBe('InvalidUsernameOrPasswordError');
     });
   });
 });

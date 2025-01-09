@@ -33,12 +33,12 @@ export class AuthService {
 
         const user = await this.usersRepository.findByUsername(userData.username);
         if (!user) {
-            return Promise.reject(new Error('UserNotFoundError'));
+            return Promise.reject(new Error('InvalidUsernameOrPasswordError'));
         }
 
         const isPasswordValid = await this.checkPassword(userData.password, user.password);
         if (!isPasswordValid) {
-            return Promise.reject(new Error('InvalidPasswordError'));
+            return Promise.reject(new Error('InvalidUsernameOrPasswordError'));
         }
 
         const token = this.authRepository.createToken({ id: user.id, username: user.username });

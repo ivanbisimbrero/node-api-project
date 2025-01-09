@@ -101,7 +101,7 @@ describe('AuthService', () => {
 
     it('should throw UserNotFoundError if user does not exist', async () => {
       usersRepositoryMock.findByUsername.mockResolvedValueOnce(null);
-      await expect(service.authenticateUser({ username: 'testusernotfound', password: 'password123' })).rejects.toThrow('UserNotFoundError');
+      await expect(service.authenticateUser({ username: 'testusernotfound', password: 'password123' })).rejects.toThrow('InvalidUsernameOrPasswordError');
     });
 
     it('should throw InvalidPasswordError for incorrect password', async () => {
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       usersRepositoryMock.findByUsername.mockResolvedValueOnce(user);
       bcryptCompareMock.mockResolvedValueOnce(false);
 
-      await expect(service.authenticateUser({ username: 'testuser', password: 'wrongpassword' })).rejects.toThrow('InvalidPasswordError');
+      await expect(service.authenticateUser({ username: 'testuser', password: 'wrongpassword' })).rejects.toThrow('InvalidUsernameOrPasswordError');
     });
   });
 });

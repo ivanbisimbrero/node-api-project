@@ -12,7 +12,7 @@ export class CompanyRepository {
   async create(company: Company): Promise<Company> {
     const queryDoc = {
       sql: 'INSERT INTO companies (company_typeId, name, address, phone, cif, active, admin) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      params: [ company.company_typeId, company.name, company.address, company.phone, company.cif, company.active ?? false, company.admin ?? false ]
+      params: [ company.company_typeId, company.name, company.address, company.phone, company.cif, company.active ?? true, company.admin ?? false ]
     };
 
     const companyCreated = await this.databaseService.execQuery(queryDoc);

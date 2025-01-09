@@ -38,10 +38,8 @@ export class AuthController {
             if (error instanceof Error) {
                 if (error.message === 'InvalidUsernameError') {
                     res.status(400).json({ error: error.message });
-                } else if (error.message === 'InvalidPasswordError') {
-                    res.status(401).json({ error: error.message });
-                } else if (error.message === 'UserNotFoundError') {
-                    res.status(404).json({ error: error.message });
+                } else if (error.message === 'InvalidUsernameOrPasswordError') {
+                    res.status(403).json({ error: error.message });
                 } else {
                     res.status(500).json({ error: error.message });
                 }
