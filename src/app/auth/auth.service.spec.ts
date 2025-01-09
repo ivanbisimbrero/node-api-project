@@ -6,6 +6,7 @@ import { UsersRepository } from '../users/users.repository';
 import { AuthRepository } from './auth.repository';
 import { User } from '../users/users.model';
 import { AuthorizerUser } from './auth.model';
+import { AuditService } from '../audit/audit.service';
 
 // Service Test
 describe('AuthService', () => {
@@ -14,6 +15,7 @@ describe('AuthService', () => {
   let authRepositoryMock: jest.Mocked<AuthRepository>;
   let bcryptCompareMock: jest.SpyInstance;
   let bcryptHashMock: jest.SpyInstance;
+  let auditServiceMock: jest.Mocked<AuditService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,6 +30,11 @@ describe('AuthService', () => {
       createToken: jest.fn()
     } as unknown as jest.Mocked<AuthRepository>;
 
+    auditServiceMock = {
+      create: jest.fn()
+    } as unknown as jest.Mocked<AuditService>;
+
+    Container.set(AuditService, auditServiceMock);
     Container.set(UsersRepository, usersRepositoryMock);
     Container.set(AuthRepository, authRepositoryMock);
     service = Container.get(AuthService);
@@ -37,7 +44,7 @@ describe('AuthService', () => {
   });
 
   describe('createUser', () => {
-    it('should create a user with hashed password', async () => {
+    it('should create a user with hashed password and create an audit log', async () => {
       const hashedPassword = 'hashedPassword123';
       const userData: Omit<User, 'id'> = {
         username: 'testuser',
@@ -56,6 +63,7 @@ describe('AuthService', () => {
         password: hashedPassword
       });
       expect(result).toBe(true);
+      expect(auditServiceMock.create).toHaveBeenCalledWith('Created new User');
     });
 
     it('should throw UserInputValidationError for invalid input', async () => {
@@ -64,7 +72,7 @@ describe('AuthService', () => {
   });
 
   describe('authenticateUser', () => {
-    it('should authenticate user and return token', async () => {
+    it('should authenticate user and return token and create an audit log', async () => {
       const userData = { username: 'testuser', password: 'password123' };
       const user: User = {
         id: 1,
@@ -84,6 +92,7 @@ describe('AuthService', () => {
       expect(bcryptCompareMock).toHaveBeenCalledWith('password123', 'hashedPassword123');
       expect(authRepositoryMock.createToken).toHaveBeenCalledWith({ id: 1, username: 'testuser' });
       expect(result).toBe(token);
+      expect(auditServiceMock.create).toHaveBeenCalledWith(`User ${user.username} authenticated`);
     });
 
     it('should throw InvalidUsernameError for invalid username', async () => {

@@ -7,16 +7,20 @@ export function authMiddleware(req: AuthUserRequest, res: Response, next: NextFu
     const authHeader = req.headers.authorization;
     const authRepository = Container.get(AuthRepository);
 
-    if (authHeader === undefined) {
-        res.status(401).json({ error: 'Authorization header is required' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ error: 'Authorization header must contain a Bearer token' });
         return;
-    } else if (authHeader.toString().length === 0) {
+    }
+
+    const token = authHeader.split(' ')[1]; // Extraer solo el token
+
+    if (!token) {
         res.status(401).json({ error: 'Token is required' });
         return;
     }
 
     try {
-        const decoded = authRepository.getUserFromToken(authHeader);
+        const decoded = authRepository.getUserFromToken(token);
         req.user = decoded;
         next();
     } catch (error) {

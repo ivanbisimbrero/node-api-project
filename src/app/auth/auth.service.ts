@@ -4,12 +4,14 @@ import { UsersRepository } from '../users/users.repository';
 import { User } from '../users/users.model';
 import { isString } from 'lodash';
 import { AuthRepository } from './auth.repository';
+import { AuditService } from '../audit/audit.service';
 
 @Service()
 export class AuthService {
     constructor(
         private readonly usersRepository: UsersRepository,
-        private readonly authRepository: AuthRepository
+        private readonly authRepository: AuthRepository,
+        private readonly auditService: AuditService
     ) {}
 
     async createUser(userData: Omit<User, 'id'>): Promise<boolean> {
@@ -20,6 +22,7 @@ export class AuthService {
         const hashedPassword = await this.hashPassword(userData.password);
         const user = { ...userData, password: hashedPassword };
         const newUser = await this.usersRepository.create(user);
+        await this.auditService.create('Created new User');
         return newUser != null;
     }
 
@@ -39,6 +42,7 @@ export class AuthService {
         }
 
         const token = this.authRepository.createToken({ id: user.id, username: user.username });
+        await this.auditService.create(`User ${userData.username} authenticated`);
         return token;
     }
 

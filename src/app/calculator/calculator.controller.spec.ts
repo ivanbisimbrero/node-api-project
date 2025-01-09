@@ -10,10 +10,17 @@ import {Api} from "../../server/api/api";
 import cors from "cors";
 import {json, urlencoded} from "body-parser";
 import morgan from "morgan";
+import { DatabaseTestService } from '../../database/database.test.service';
 
 describe('CalculatorController Integration Test', () => {
   let app: express.Express;
   let databaseService: DatabaseService;
+  let databaseTestService: DatabaseTestService;
+
+  beforeAll(async () => {
+    databaseTestService = Container.get(DatabaseTestService);
+    await databaseTestService.dumpDatabase();
+  });
 
   beforeEach(async () => {
     // Set database to in-memory for testing

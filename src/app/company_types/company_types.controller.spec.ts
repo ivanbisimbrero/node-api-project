@@ -11,13 +11,20 @@ import cors from 'cors';
 import { json, urlencoded } from 'body-parser';
 import morgan from 'morgan';
 import { AuthRepository } from '../auth/auth.repository';
+import { DatabaseTestService } from '../../database/database.test.service';
 
 describe('CompanyTypeController Integration Test', () => {
   let app: express.Express;
   let databaseService: DatabaseService;
   let authRepository: AuthRepository;
+  let databaseTestService: DatabaseTestService;
   let token: string;
   let fakeToken: string;
+
+  beforeAll(async () => { 
+    databaseTestService = Container.get(DatabaseTestService);
+    await databaseTestService.dumpDatabase();
+  });
 
   beforeEach(async () => {
     // Set database to in-memory for testing
@@ -49,6 +56,7 @@ describe('CompanyTypeController Integration Test', () => {
   afterAll(async () => {
     // Close DB connection after all tests
     await databaseService.closeDatabase();
+    await databaseTestService.closeDatabase();
   });
 
   describe('POST /api/company-types', () => {
@@ -60,6 +68,16 @@ describe('CompanyTypeController Integration Test', () => {
 
       expect(res.status).toBe(201);
       expect(res.body).toEqual({ message: 'CompanyType created' });
+      
+    });
+
+    it('should return 401 if token is invalid', async () => {
+      const res = await request(app)
+        .post('/api/company-types')
+        .set('Authorization', `Bearer ${fakeToken}`)
+        .send({ type: 'Tech' });
+
+      expect(res.status).toBe(401);
     });
 
     it('should return 400 if input is invalid', async () => {
@@ -74,6 +92,10 @@ describe('CompanyTypeController Integration Test', () => {
 
   describe('GET /api/company-types', () => {
     it('should return all company types', async () => {
+      const resCompanyType = await request(app)
+        .post('/api/company-types')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ type: 'Tech' });
       const res = await request(app)
         .get('/api/company-types')
         .set('Authorization', `Bearer ${token}`);
@@ -81,16 +103,36 @@ describe('CompanyTypeController Integration Test', () => {
       expect(res.status).toBe(200);
       expect(res.body).toEqual(expect.any(Array));
     });
+
+    it('should return 401 if token is invalid', async () => {
+      const res = await request(app)
+        .get('/api/company-types')
+        .set('Authorization', `Bearer ${fakeToken}`);
+
+      expect(res.status).toBe(401);
+    });
   });
 
   describe('GET /api/company-types/:id', () => {
     it('should return a company type by id', async () => {
+      const resCompany = await request(app)
+        .post('/api/company-types')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ type: 'Tech' });
       const res = await request(app)
         .get('/api/company-types/1')
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ id: 1, type: expect.any(String) });
+    });
+
+    it('should return 401 if token is invalid', async () => {
+      const res = await request(app)
+        .get('/api/company-types/1')
+        .set('Authorization', `Bearer ${fakeToken}`);
+
+      expect(res.status).toBe(401);
     });
 
     it('should return 404 if company type not found', async () => {

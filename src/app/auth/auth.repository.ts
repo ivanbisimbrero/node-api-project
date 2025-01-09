@@ -12,17 +12,25 @@ export class AuthRepository {
     }
 
     verifyToken(token: string): object | string {
-        return jwt.verify(token, config.user_sessions.secret);
+        try {
+            return jwt.verify(token, config.user_sessions.secret);
+        } catch (err) {
+            throw new Error('Invalid token');
+        }
     }
 
     getUserFromToken(token: string): AuthorizerUser {
-        const decoded = jwt.verify(token, config.user_sessions.secret) as AuthorizerUser;
-        if (isNil(decoded)) {
-            throw new Error('Token is not valid');
+        try {
+            const decoded = jwt.verify(token, config.user_sessions.secret) as AuthorizerUser;
+            if (isNil(decoded)) {
+                throw new Error('Token is not valid');
+            }
+            return {
+                id: decoded.id,
+                username: decoded.username
+            };
+        } catch (err) {
+            throw new Error('Invalid token');
         }
-        return {
-            id: decoded.id,
-            username: decoded.username
-        };
     }
 }

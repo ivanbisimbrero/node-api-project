@@ -6,7 +6,7 @@ import { User } from './users.model';
 @Service()
 export class UsersRepository {
   constructor(
-    private readonly databaseService: DatabaseService,
+    private readonly databaseService: DatabaseService
   ) {}
 
   async create(user: User): Promise<User> {

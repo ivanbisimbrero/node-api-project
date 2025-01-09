@@ -11,10 +11,10 @@ export class CompanyController {
     constructor(
         private readonly companyService: CompanyService
     ) {
+        this.companyRouter.use(authMiddleware.bind(this));
         this.companyRouter.post('/', this.createCompany.bind(this));
         this.companyRouter.get('/', this.getAllCompanies.bind(this));
         this.companyRouter.get('/:id', this.getCompanyById.bind(this));
-        this.companyRouter.use(authMiddleware.bind(this));
     }
 
     getRouter(): Router {

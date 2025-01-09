@@ -11,10 +11,10 @@ export class CompanyTypeController {
     constructor(
         private readonly companyTypeService: CompanyTypeService,
     ) {
+        this.companyTypeRouter.use(authMiddleware.bind(this));
         this.companyTypeRouter.post('/', this.createCompanyType.bind(this));
         this.companyTypeRouter.get('/', this.getAllCompanyTypes.bind(this));
         this.companyTypeRouter.get('/:id', this.getCompanyTypeById.bind(this));
-        this.companyTypeRouter.use(authMiddleware.bind(this));
     }
 
     getRouter(): Router {
@@ -29,7 +29,11 @@ export class CompanyTypeController {
             res.status(201).json({ message: 'CompanyType created' });
         } catch (error) {
             if(error instanceof Error) { 
-                res.status(400).json({ error: error.message });
+                if(error.message === 'CompanyTypeInputValidationError') {
+                    res.status(400).json({ error: error.message });
+                } else {
+                    res.status(500).json({ error: error.message });
+                }
             }
         }
     }

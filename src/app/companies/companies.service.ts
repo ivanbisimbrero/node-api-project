@@ -5,21 +5,26 @@ import { isString, isNumber, toNumber } from 'lodash';
 
 import { CompanyRepository } from './companies.repository';
 import { Company } from './companies.model';
+import { AuditService } from '../audit/audit.service';
 
 @Service()
 export class CompanyService {
 
-  constructor(private readonly companyRepository: CompanyRepository) { }
+  constructor(
+    private readonly companyRepository: CompanyRepository,
+    private readonly auditService: AuditService
+  ) { }
 
-  async create(companyData: Omit<Company, 'id'>): Promise<Company> { //Preguntar a Raul que es Omit, por el apaño del chat
+  async create(companyData: Omit<Company, 'id'>): Promise<Company> {
     if (!this.isValidCompany(companyData)) {
       return Promise.reject(new Error('CompanyInputValidationError'));
     }
-
+    await this.auditService.create("Created new Company");
     return await this.companyRepository.create(companyData);
   }
 
   async findAll(): Promise<Company[]> {
+    await this.auditService.create("Get all Companies");
     return await this.companyRepository.findAll();
   }
 
@@ -27,7 +32,7 @@ export class CompanyService {
     if (!this.isValidId(companyId)) {
       return Promise.reject(new Error('InvalidCompanyIdError'));
     }
-
+    await this.auditService.create(`Get Company with ID: ${companyId}`);
     return await this.companyRepository.findById(companyId);
   }
 
